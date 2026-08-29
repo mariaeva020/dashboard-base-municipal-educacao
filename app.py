@@ -4031,21 +4031,15 @@ with abas[12]:
         f"× {formatar_inteiro(df.shape[1])} variáveis**"
     )
 
-    # ============================================================
-    # VERSÃO PARA EXIBIÇÃO
-    # Mantém os nomes técnicos na base original e nos downloads.
-    # ============================================================
-
     # ========================================================
     # PRÉVIA FORMATADA DOS DADOS
+    # Mantém os nomes técnicos na base original e nos downloads.
     # ========================================================
 
     LIMITE_VISUALIZACAO = 500
 
-    df_previa = (
-        df.head(
-            LIMITE_VISUALIZACAO
-        )
+    df_previa = df.head(
+        LIMITE_VISUALIZACAO
     )
 
     exibir_tabela(
@@ -4061,24 +4055,31 @@ with abas[12]:
             f"Os arquivos para download contêm os "
             f"{formatar_inteiro(len(df))} registros filtrados."
         )
-        col1, col2 = st.columns(
-            2
-        )
+
+    # ========================================================
+    # DOWNLOADS
+    # Os arquivos mantêm os nomes técnicos originais.
+    # ========================================================
+
+    col1, col2 = st.columns(
+        2
+    )
 
     with col1:
 
-        csv = df.to_csv(
-            index=False
-        ).encode(
-            "utf-8-sig"
+        csv = (
+            df.to_csv(
+                index=False
+            )
+            .encode(
+                "utf-8-sig"
+            )
         )
 
         st.download_button(
             label="Baixar dados filtrados em CSV",
             data=csv,
-            file_name=(
-                "dados_filtrados.csv"
-            ),
+            file_name="dados_filtrados.csv",
             mime="text/csv",
             use_container_width=True
         )
@@ -4092,12 +4093,14 @@ with abas[12]:
         st.download_button(
             label="Baixar dados filtrados em Parquet",
             data=parquet,
-            file_name=(
-                "dados_filtrados.parquet"
-            ),
+            file_name="dados_filtrados.parquet",
             mime="application/octet-stream",
             use_container_width=True
         )
+
+    # ========================================================
+    # CATÁLOGO DA BASE
+    # ========================================================
 
     st.subheader(
         "Catálogo da base"
@@ -4126,8 +4129,6 @@ with abas[12]:
     exibir_tabela(
         variaveis_catalogadas
     )
-
-
 # ============================================================
 # 17. RODAPÉ
 # ============================================================
