@@ -117,6 +117,770 @@ COLUNAS_ID_NUMERICAS = {
 
 
 # ============================================================
+# PADRÃO VISUAL E FORMATAÇÃO DO DASHBOARD
+# ============================================================
+
+# ------------------------------------------------------------
+# PALETA DE CORES
+# Cores discretas, legíveis e visualmente coerentes.
+# ------------------------------------------------------------
+
+COR_PRIMARIA = "#356859"       # verde petróleo
+COR_SECUNDARIA = "#D5A253"     # ocre
+COR_TERCIARIA = "#806491"      # violeta suave
+COR_QUATERNARIA = "#C66B52"    # terracota
+COR_QUINARIA = "#66788A"       # azul acinzentado
+COR_SEXTA = "#8A8E5A"          # oliva
+COR_NEUTRA = "#73777B"
+
+PALETA_CORES = [
+    COR_PRIMARIA,
+    COR_SECUNDARIA,
+    COR_TERCIARIA,
+    COR_QUATERNARIA,
+    COR_QUINARIA,
+    COR_SEXTA
+]
+
+px.defaults.color_discrete_sequence = PALETA_CORES
+
+
+# ------------------------------------------------------------
+# ESCALAS PARA HEATMAPS
+# ------------------------------------------------------------
+
+ESCALA_SEQUENCIAL = [
+    [0.00, "#F7F3EA"],
+    [0.25, "#E8D8BC"],
+    [0.50, "#D5A253"],
+    [0.75, "#C47A55"],
+    [1.00, "#8B4D45"]
+]
+
+ESCALA_DIVERGENTE = [
+    [0.00, "#8C5365"],
+    [0.25, "#C79AA6"],
+    [0.50, "#F7F3EA"],
+    [0.75, "#88AFA4"],
+    [1.00, "#356859"]
+]
+
+
+# ------------------------------------------------------------
+# CORES ESTRUTURAIS
+# ------------------------------------------------------------
+
+COR_EIXO = "#6B7280"
+COR_TEXTO = "#2F3437"
+COR_BORDA = "#D7DCE1"
+COR_FUNDO = "#FFFFFF"
+
+
+# ============================================================
+# NOMES AMIGÁVEIS DAS VARIÁVEIS
+# ============================================================
+
+SIGLAS = {
+    "ideb": "IDEB",
+    "saeb": "SAEB",
+    "uf": "UF",
+    "pib": "PIB",
+    "bpc": "BPC",
+    "tdi": "TDI",
+    "had": "HAD",
+    "atu": "ATU",
+    "ied": "IED",
+    "afd": "AFD",
+    "ird": "IRD",
+    "icg": "ICG",
+    "cv": "CV",
+    "iqr": "IQR",
+    "ibge": "IBGE",
+    "cgu": "CGU"
+}
+
+
+SUBSTITUICOES_TERMOS = {
+    "qtd": "Quantidade",
+    "pct": "%",
+    "cod": "Código",
+    "media": "Média",
+    "mediana": "Mediana",
+    "minimo": "Mínimo",
+    "maximo": "Máximo",
+    "desvio": "Desvio",
+    "padrao": "padrão",
+    "aprovacao": "aprovação",
+    "matematica": "matemática",
+    "portugues": "português",
+    "populacao": "população",
+    "educacao": "educação",
+    "producao": "produção",
+    "importacao": "importação",
+    "exportacao": "exportação",
+    "municipio": "município",
+    "municipios": "municípios",
+    "variavel": "variável",
+    "variaveis": "variáveis",
+    "correlacao": "correlação",
+    "assimetria": "Assimetria",
+    "curtose": "Curtose"
+}
+
+
+def nome_amigavel(
+    nome
+):
+    """
+    Converte nomes técnicos para nomes adequados à exibição.
+
+    Exemplo:
+    nota_matematica_saeb
+    -> Nota matemática SAEB
+    """
+
+    nome = str(
+        nome
+    ).strip()
+
+    # Casos especiais completos
+    especiais = {
+        "cod_municipio":
+            "Código do município",
+
+        "nome_municipio":
+            "Município",
+
+        "sigla_uf":
+            "UF",
+
+        "cod_uf":
+            "Código da UF",
+
+        "taxa_aprovacao_etapa":
+            "Taxa de aprovação da etapa",
+
+        "indicador_rendimento":
+            "Indicador de rendimento",
+
+        "nota_media_padronizada":
+            "Nota média padronizada",
+
+        "nota_matematica_saeb":
+            "Nota de matemática no SAEB",
+
+        "nota_portugues_saeb":
+            "Nota de português no SAEB",
+
+        "qtd_registros":
+            "Quantidade de registros",
+
+        "qtd_municipios":
+            "Quantidade de municípios",
+
+        "pct_ausentes":
+            "Ausentes (%)",
+
+        "pct_zeros":
+            "Zeros (%)",
+
+        "retencao_pct":
+            "Retenção (%)"
+    }
+
+    if nome.lower() in especiais:
+
+        return especiais[
+            nome.lower()
+        ]
+
+    partes = nome.replace(
+        "_",
+        " "
+    ).split()
+
+    resultado = []
+
+    for parte in partes:
+
+        parte_lower = (
+            parte.lower()
+        )
+
+        if parte_lower in SIGLAS:
+
+            resultado.append(
+                SIGLAS[
+                    parte_lower
+                ]
+            )
+
+        elif parte_lower in SUBSTITUICOES_TERMOS:
+
+            resultado.append(
+                SUBSTITUICOES_TERMOS[
+                    parte_lower
+                ]
+            )
+
+        else:
+
+            resultado.append(
+                parte_lower
+            )
+
+    texto = " ".join(
+        resultado
+    )
+
+    # Inicial maiúscula apenas quando não começa por sigla.
+    primeira_palavra = texto.split()[0]
+
+    if primeira_palavra not in (
+        SIGLAS.values()
+    ):
+
+        texto = (
+            texto[0].upper()
+            +
+            texto[1:]
+        )
+
+    return texto
+
+
+# ============================================================
+# FORMATAÇÃO NUMÉRICA BRASILEIRA
+# ============================================================
+
+def formatar_inteiro_br(
+    valor
+):
+
+    if pd.isna(
+        valor
+    ):
+
+        return "—"
+
+    return (
+        f"{int(round(valor)):,}"
+        .replace(
+            ",",
+            "."
+        )
+    )
+
+
+def formatar_decimal_br(
+    valor,
+    casas=2
+):
+
+    if pd.isna(
+        valor
+    ):
+
+        return "—"
+
+    texto = (
+        f"{float(valor):,.{casas}f}"
+    )
+
+    texto = (
+        texto
+        .replace(
+            ",",
+            "X"
+        )
+        .replace(
+            ".",
+            ","
+        )
+        .replace(
+            "X",
+            "."
+        )
+    )
+
+    return texto
+
+
+def serie_e_inteira(
+    serie
+):
+
+    valores = (
+        pd.to_numeric(
+            serie,
+            errors="coerce"
+        )
+        .dropna()
+    )
+
+    if valores.empty:
+
+        return False
+
+    return bool(
+        np.allclose(
+            valores,
+            np.round(
+                valores
+            )
+        )
+    )
+
+
+def casas_decimais_variavel(
+    df,
+    variavel
+):
+
+    if variavel not in df.columns:
+
+        return 2
+
+    serie = df[
+        variavel
+    ]
+
+    if serie_e_inteira(
+        serie
+    ):
+
+        return 0
+
+    return 2
+
+
+# ============================================================
+# FORMATAÇÃO PADRONIZADA DAS TABELAS
+# ============================================================
+
+def preparar_tabela(
+    df
+):
+
+    tabela = df.copy()
+    # Identificadores não recebem formatação numérica quantitativa.
+    for coluna_id in [
+        "ano",
+        "cod_uf",
+        "cod_municipio"
+    ]:
+        if coluna_id in tabela.columns:
+
+            tabela[coluna_id] = (
+                pd.to_numeric(
+                    tabela[coluna_id],
+                    errors="coerce"
+                )
+                .astype("Int64")
+                .astype("string")
+            )
+
+    # ========================================================
+    # NOMES DE VARIÁVEIS DENTRO DAS TABELAS
+    # ========================================================
+
+    colunas_com_nomes_variaveis = [
+        "variavel",
+        "Variável",
+        "Variável 1",
+        "Variável 2"
+    ]
+
+    for coluna_variavel in colunas_com_nomes_variaveis:
+
+        if coluna_variavel in tabela.columns:
+
+            tabela[coluna_variavel] = (
+                tabela[coluna_variavel]
+                .apply(
+                    lambda valor:
+                        nome_amigavel(valor)
+                        if pd.notna(valor)
+                        else valor
+                )
+            )
+    tabela = tabela.rename(
+        columns={
+            coluna:
+                nome_amigavel(
+                    coluna
+                )
+            for coluna in tabela.columns
+        }
+    )
+
+    formatadores = {}
+
+    for coluna in tabela.columns:
+
+        if not pd.api.types.is_numeric_dtype(
+            tabela[
+                coluna
+            ]
+        ):
+
+            continue
+
+        nome_lower = (
+            coluna.lower()
+        )
+
+        if (
+            "%"
+            in coluna
+            or
+            "percentual"
+            in nome_lower
+        ):
+
+            formatadores[
+                coluna
+            ] = lambda x: (
+                formatar_decimal_br(
+                    x,
+                    2
+                )
+            )
+
+        elif serie_e_inteira(
+            tabela[
+                coluna
+            ]
+        ):
+
+            formatadores[
+                coluna
+            ] = formatar_inteiro_br
+
+        else:
+
+            formatadores[
+                coluna
+            ] = lambda x: (
+                formatar_decimal_br(
+                    x,
+                    2
+                )
+            )
+
+    estilo = (
+        tabela
+        .style
+        .format(
+            formatadores,
+            na_rep="—"
+        )
+        .set_properties(
+            **{
+                "text-align":
+                    "center"
+            }
+        )
+        .set_table_styles(
+            [
+                {
+                    "selector":
+                        "th",
+
+                    "props": [
+                        (
+                            "text-align",
+                            "center"
+                        ),
+                        (
+                            "font-weight",
+                            "600"
+                        ),
+                        (
+                            "background-color",
+                            "#F4F5F6"
+                        )
+                    ]
+                },
+
+                {
+                    "selector":
+                        "td",
+
+                    "props": [
+                        (
+                            "text-align",
+                            "center"
+                        )
+                    ]
+                }
+            ]
+        )
+    )
+
+    return estilo
+
+
+def exibir_tabela(
+    df,
+    altura=None
+):
+
+    argumentos = {
+        "use_container_width":
+            True,
+
+        "hide_index":
+            True
+    }
+
+    if altura is not None:
+
+        argumentos[
+            "height"
+        ] = altura
+
+    st.dataframe(
+        preparar_tabela(
+            df
+        ),
+        **argumentos
+    )
+
+
+# ============================================================
+# ESTILO PADRÃO DOS GRÁFICOS
+# ============================================================
+
+def aplicar_estilo_grafico(
+    fig,
+    titulo,
+    titulo_x=None,
+    titulo_y=None,
+    altura=500,
+    legenda=True
+):
+
+    fig.update_layout(
+        title={
+            "text":
+                titulo,
+
+            "x":
+                0.01,
+
+            "xanchor":
+                "left",
+
+            "font": {
+                "size":
+                    19,
+
+                "color":
+                    COR_TEXTO
+            }
+        },
+
+        template=
+            "plotly_white",
+
+        paper_bgcolor=
+            COR_FUNDO,
+
+        plot_bgcolor=
+            COR_FUNDO,
+
+        font={
+            "family":
+                "Arial",
+
+            "size":
+                13,
+
+            "color":
+                COR_TEXTO
+        },
+
+        height=
+            altura,
+
+        separators=
+            ",.",
+
+        margin=dict(
+            l=60,
+            r=30,
+            t=75,
+            b=60
+        ),
+
+        showlegend=
+            legenda,
+
+        legend=dict(
+            orientation=
+                "h",
+
+            yanchor=
+                "bottom",
+
+            y=
+                1.02,
+
+            xanchor=
+                "right",
+
+            x=
+                1
+        )
+    )
+
+    fig.update_xaxes(
+        title_text=
+            titulo_x,
+
+        showgrid=
+            False,
+
+        zeroline=
+            False,
+
+        showline=
+            True,
+
+        linecolor=
+            COR_EIXO,
+
+        linewidth=
+            1,
+
+        ticks=
+            "outside",
+
+        tickcolor=
+            COR_EIXO,
+
+        automargin=
+            True
+    )
+
+    fig.update_yaxes(
+        title_text=
+            titulo_y,
+
+        showgrid=
+            False,
+
+        zeroline=
+            False,
+
+        showline=
+            True,
+
+        linecolor=
+            COR_EIXO,
+
+        linewidth=
+            1,
+
+        ticks=
+            "outside",
+
+        tickcolor=
+            COR_EIXO,
+
+        automargin=
+            True
+    )
+
+    return fig
+
+
+# ============================================================
+# RÓTULOS DOS GRÁFICOS
+# ============================================================
+
+def adicionar_rotulos_barras(
+    fig,
+    orientacao="vertical",
+    casas=0,
+    percentual=False
+):
+
+    formato = (
+        f",.{casas}f"
+    )
+
+    sufixo = (
+        "%"
+        if percentual
+        else ""
+    )
+
+    if orientacao == "horizontal":
+
+        template = (
+            f"%{{x:{formato}}}"
+            f"{sufixo}"
+        )
+
+    else:
+
+        template = (
+            f"%{{y:{formato}}}"
+            f"{sufixo}"
+        )
+
+    fig.update_traces(
+        texttemplate=
+            template,
+
+        textposition=
+            "outside",
+
+        cliponaxis=
+            False,
+
+        textfont_size=
+            11
+    )
+
+    return fig
+
+
+def adicionar_rotulos_linha(
+    fig,
+    casas=0,
+    percentual=False
+):
+
+    formato = (
+        f",.{casas}f"
+    )
+
+    sufixo = (
+        "%"
+        if percentual
+        else ""
+    )
+
+    fig.update_traces(
+        mode=
+            "lines+markers+text",
+
+        texttemplate=(
+            f"%{{y:{formato}}}"
+            f"{sufixo}"
+        ),
+
+        textposition=
+            "top center"
+    )
+
+    return fig
+
+
+# ============================================================
 # 5. VALIDAÇÃO DOS ARQUIVOS
 # ============================================================
 
@@ -1220,7 +1984,8 @@ if numericas:
 
     variavel = st.sidebar.selectbox(
         "Variável numérica",
-        options=numericas
+        options=numericas,
+        format_func=nome_amigavel
     )
 
 else:
@@ -1237,7 +2002,8 @@ metodo_correlacao = (
         options=[
             "pearson",
             "spearman"
-        ]
+        ],
+        format_func=lambda x: x.capitalize()
     )
 )
 
@@ -1475,11 +2241,9 @@ with abas[0]:
         ]
     )
 
-    st.dataframe(
-        info,
-        use_container_width=True,
-        hide_index=True
-    )
+    exibir_tabela(
+        info
+     )
 
     if "ano" in df_original.columns:
 
@@ -1527,13 +2291,23 @@ with abas[0]:
                 x="ano",
                 y="municipios",
                 markers=True,
-                title=(
-                    "Quantidade de municípios por ano"
-                )
+                color_discrete_sequence=[
+                    COR_PRIMARIA
+                ]
             )
 
-            fig.update_layout(
-                template="plotly_white"
+            fig = aplicar_estilo_grafico(
+                fig,
+                titulo="Cobertura territorial por ano",
+                titulo_x="Ano",
+                titulo_y="Quantidade de municípios",
+                altura=470,
+                legenda=False
+            )
+
+            fig = adicionar_rotulos_linha(
+                fig,
+                casas=0
             )
 
             st.plotly_chart(
@@ -1543,22 +2317,17 @@ with abas[0]:
 
         with col_b:
 
-            st.dataframe(
-                cobertura,
-                use_container_width=True,
-                hide_index=True
+           exibir_tabela(
+                cobertura
             )
 
     st.subheader(
         "Amostra dos registros"
     )
-
-    st.dataframe(
+    exibir_tabela(
         df.head(
             50
-        ),
-        use_container_width=True,
-        hide_index=True
+        )
     )
 
 
@@ -1576,10 +2345,8 @@ with abas[1]:
         "Perfil das variáveis"
     )
 
-    st.dataframe(
-        perfil,
-        use_container_width=True,
-        hide_index=True
+    exibir_tabela(
+        perfil
     )
 
     st.subheader(
@@ -1602,13 +2369,47 @@ with abas[1]:
         )
     )
 
+    ausencias_plot = (
+        ausencias.copy()
+    )
+
+    ausencias_plot[
+        "Variável"
+    ] = (
+        ausencias_plot[
+            "Variável"
+        ]
+        .apply(
+            nome_amigavel
+        )
+    )
+
     fig = px.bar(
-        ausencias.sort_values(
+        ausencias_plot.sort_values(
             "Ausentes (%)"
         ),
         x="Ausentes (%)",
         y="Variável",
-        orientation="h"
+        orientation="h",
+        color_discrete_sequence=[
+            COR_QUATERNARIA
+        ]
+    )
+
+    fig = aplicar_estilo_grafico(
+        fig,
+        titulo="Variáveis com maior proporção de valores ausentes",
+        titulo_x="Valores ausentes (%)",
+        titulo_y="Variável",
+        altura=720,
+        legenda=False
+    )
+
+    fig = adicionar_rotulos_barras(
+        fig,
+        orientacao="horizontal",
+        casas=2,
+        percentual=True
     )
 
     fig.update_layout(
@@ -1690,25 +2491,39 @@ with abas[1]:
             )
         )
 
+        matriz_exibicao = matriz.copy()
+
+        matriz_exibicao.index = [
+            nome_amigavel(indice)
+            for indice in matriz_exibicao.index
+        ]
+
         fig = px.imshow(
-            matriz,
+            matriz_exibicao,
             aspect="auto",
-            labels=dict(
-                color="Ausentes (%)"
-            ),
-            title=(
-                "Mapa de ausência por variável e ano"
-            )
+            labels={
+                "x": "Ano",
+                "y": "Variável",
+                "color": "Ausentes (%)"
+            },
+            color_continuous_scale=ESCALA_SEQUENCIAL,
+            text_auto=".1f"
         )
 
-        fig.update_layout(
-            height=700
+        fig = aplicar_estilo_grafico(
+            fig,
+            titulo="Distribuição dos valores ausentes por variável e ano",
+            titulo_x="Ano",
+            titulo_y="Variável",
+            altura=720,
+            legenda=False
         )
 
         st.plotly_chart(
             fig,
             use_container_width=True
         )
+
 
 
 # ============================================================
@@ -1725,10 +2540,8 @@ with abas[2]:
         "Estatísticas descritivas das variáveis numéricas"
     )
 
-    st.dataframe(
-        estatisticas,
-        use_container_width=True,
-        hide_index=True
+    exibir_tabela(
+        estatisticas
     )
 
     if (
@@ -1738,7 +2551,7 @@ with abas[2]:
     ):
 
         st.subheader(
-            f"Estatísticas de {variavel} por ano"
+            f"Estatísticas de {nome_amigavel(variavel)} por ano"
         )
 
         resumo_ano = (
@@ -1759,10 +2572,9 @@ with abas[2]:
             .reset_index()
         )
 
-        st.dataframe(
-            resumo_ano,
-            use_container_width=True,
-            hide_index=True
+        exibir_tabela(
+            resumo_ano
+
         )
 
 
@@ -1781,7 +2593,7 @@ with abas[3]:
     else:
 
         st.subheader(
-            f"Distribuição de {variavel}"
+            f"Distribuição de {nome_amigavel(variavel)}"
         )
 
         col1, col2 = st.columns(
@@ -1790,11 +2602,31 @@ with abas[3]:
 
         with col1:
 
+            nome_variavel = nome_amigavel(
+                variavel
+            )
+
             fig = px.histogram(
                 df,
                 x=variavel,
                 nbins=50,
-                marginal="rug"
+                marginal="rug",
+                color_discrete_sequence=[
+                    COR_PRIMARIA
+                ]
+            )
+
+            fig = aplicar_estilo_grafico(
+                fig,
+                titulo=(
+                    f"Distribuição de {nome_variavel}"
+                ),
+                titulo_x=
+                    nome_variavel,
+                titulo_y=
+                    "Frequência",
+                altura=500,
+                legenda=False
             )
 
             fig.update_layout(
@@ -1850,6 +2682,38 @@ with abas[3]:
                 template="plotly_white"
             )
 
+            fig.update_traces(
+                marker_color=
+                    COR_TERCIARIA,
+
+                line_color=
+                    COR_TERCIARIA,
+
+                fillcolor=
+                    "rgba(128,100,145,0.25)"
+            )
+
+            fig = aplicar_estilo_grafico(
+                fig,
+                titulo=(
+                    f"Distribuição de {nome_amigavel(variavel)}"
+                ),
+                titulo_x=(
+                    "Ano"
+                    if
+                    "ano" in df.columns
+                    and
+                    df["ano"].nunique() > 1
+                    else None
+                ),
+                titulo_y=
+                    nome_amigavel(
+                        variavel
+                    ),
+                altura=500,
+                legenda=False
+            )
+
             st.plotly_chart(
                 fig,
                 use_container_width=True
@@ -1899,7 +2763,7 @@ with abas[4]:
         )
 
         st.subheader(
-            f"Evolução temporal — {variavel}"
+            f"Evolução temporal — {nome_amigavel(variavel)}"
         )
 
         fig = go.Figure()
@@ -1930,10 +2794,51 @@ with abas[4]:
             )
         )
 
-        fig.update_layout(
-            template="plotly_white",
-            xaxis_title="Ano",
-            yaxis_title=variavel
+        fig.update_traces(
+            line=dict(
+                width=2.5
+            ),
+            marker=dict(
+                size=8
+            )
+        )
+
+        # Cores distintas, porém coerentes.
+        fig.data[0].line.color = (
+            COR_PRIMARIA
+        )
+
+        fig.data[0].marker.color = (
+            COR_PRIMARIA
+        )
+
+        if len(
+            fig.data
+        ) > 1:
+
+            fig.data[1].line.color = (
+                COR_SECUNDARIA
+            )
+
+            fig.data[1].marker.color = (
+                COR_SECUNDARIA
+            )
+
+
+        fig = aplicar_estilo_grafico(
+            fig,
+            titulo=(
+                f"Evolução temporal de "
+                f"{nome_amigavel(variavel)}"
+            ),
+            titulo_x=
+                "Ano",
+            titulo_y=
+                nome_amigavel(
+                    variavel
+                ),
+            altura=520,
+            legenda=True
         )
 
         st.plotly_chart(
@@ -1941,10 +2846,8 @@ with abas[4]:
             use_container_width=True
         )
 
-        st.dataframe(
-            temporal,
-            use_container_width=True,
-            hide_index=True
+        exibir_tabela(
+            temporal
         )
 
 
@@ -1995,7 +2898,7 @@ with abas[5]:
         )
 
         st.subheader(
-            f"Distribuição territorial — {variavel}"
+            f"Distribuição territorial — {nome_amigavel(variavel)}"
         )
 
         fig = px.bar(
@@ -2005,10 +2908,37 @@ with abas[5]:
             x="Mediana",
             y="sigla_uf",
             orientation="h",
-            labels={
-                "sigla_uf":
-                    "UF"
-            }
+            color_discrete_sequence=[
+                COR_PRIMARIA
+            ]
+        )
+
+        casas = casas_decimais_variavel(
+            df_territorial,
+            variavel
+        )
+
+        fig = aplicar_estilo_grafico(
+            fig,
+            titulo=(
+                f"Mediana de "
+                f"{nome_amigavel(variavel)} "
+                f"por UF"
+            ),
+            titulo_x=
+                nome_amigavel(
+                    variavel
+                ),
+            titulo_y=
+                "UF",
+            altura=720,
+            legenda=False
+        )
+
+        fig = adicionar_rotulos_barras(
+            fig,
+            orientacao="horizontal",
+            casas=casas
         )
 
         fig.update_layout(
@@ -2021,10 +2951,8 @@ with abas[5]:
             use_container_width=True
         )
 
-        st.dataframe(
-            territorial,
-            use_container_width=True,
-            hide_index=True
+        exibir_tabela(
+            territorial
         )
 
 
@@ -2048,7 +2976,7 @@ with abas[6]:
         )
 
         st.subheader(
-            f"Valores extremos pelo critério do IQR — {variavel}"
+            f"Valores extremos pelo critério do IQR — {nome_amigavel(variavel)}"
         )
 
         col1, col2 = st.columns(
@@ -2110,7 +3038,31 @@ with abas[6]:
                 fig = px.bar(
                     contagem_outliers,
                     x="ano",
-                    y="Quantidade"
+                    y="Quantidade",
+                    color_discrete_sequence=[
+                        COR_QUATERNARIA
+                    ]
+                )
+
+                fig = aplicar_estilo_grafico(
+                    fig,
+                    titulo=(
+                        f"Valores extremos de "
+                        f"{nome_amigavel(variavel)} "
+                        f"por ano"
+                    ),
+                    titulo_x=
+                        "Ano",
+                    titulo_y=
+                        "Quantidade de registros",
+                    altura=480,
+                    legenda=False
+                )
+
+                fig = adicionar_rotulos_barras(
+                    fig,
+                    orientacao="vertical",
+                    casas=0
                 )
 
                 fig.update_layout(
@@ -2122,10 +3074,8 @@ with abas[6]:
                     use_container_width=True
                 )
 
-            st.dataframe(
-                outliers,
-                use_container_width=True,
-                hide_index=True
+            exibir_tabela(
+                outliers
             )
 
         st.caption(
@@ -2158,7 +3108,7 @@ with abas[7]:
     else:
 
         st.subheader(
-            f"Correlações com {variavel}"
+            f"Correlações com {nome_amigavel(variavel)}"
         )
 
         matriz = (
@@ -2205,13 +3155,51 @@ with abas[7]:
             20
         )
 
+        top_corr_plot = (
+            top_corr.copy()
+        )
+
+        top_corr_plot[
+            "Variável"
+        ] = (
+            top_corr_plot[
+                "Variável"
+            ]
+            .apply(
+                nome_amigavel
+            )
+        )
+
         fig = px.bar(
-            top_corr.sort_values(
+            top_corr_plot.sort_values(
                 "Correlação"
             ),
             x="Correlação",
             y="Variável",
-            orientation="h"
+            orientation="h",
+            color_discrete_sequence=[
+                COR_TERCIARIA
+            ]
+        )
+
+        fig = aplicar_estilo_grafico(
+            fig,
+            titulo=(
+                f"Variáveis mais correlacionadas com "
+                f"{nome_amigavel(variavel)}"
+            ),
+            titulo_x=
+                "Correlação",
+            titulo_y=
+                "Variável",
+            altura=620,
+            legenda=False
+        )
+
+        fig = adicionar_rotulos_barras(
+            fig,
+            orientacao="horizontal",
+            casas=2
         )
 
         fig.update_layout(
@@ -2224,10 +3212,8 @@ with abas[7]:
             use_container_width=True
         )
 
-        st.dataframe(
-            corr_variavel,
-            use_container_width=True,
-            hide_index=True
+        exibir_tabela(
+            corr_variavel
         )
 
         st.subheader(
@@ -2299,10 +3285,8 @@ with abas[7]:
                 ascending=False
             )
 
-            st.dataframe(
-                pares,
-                use_container_width=True,
-                hide_index=True
+            exibir_tabela(
+                pares
             )
 
         variaveis_heatmap = [
@@ -2327,22 +3311,38 @@ with abas[7]:
             )
         )
 
+        matriz_top_exibicao = matriz_top.copy()
+
+        nomes_corr = [
+            nome_amigavel(coluna)
+            for coluna in matriz_top_exibicao.columns
+        ]
+
+        matriz_top_exibicao.columns = nomes_corr
+        matriz_top_exibicao.index = nomes_corr
+
         fig = px.imshow(
-            matriz_top,
+            matriz_top_exibicao,
             zmin=-1,
             zmax=1,
             text_auto=".2f",
             aspect="auto",
-            title=(
-                "Matriz de correlação das variáveis selecionadas"
-            )
+            color_continuous_scale=ESCALA_DIVERGENTE
+        )
+
+        fig = aplicar_estilo_grafico(
+            fig,
+            titulo="Matriz de correlação das variáveis selecionadas",
+            titulo_x="",
+            titulo_y="",
+            altura=700,
+            legenda=False
         )
 
         st.plotly_chart(
             fig,
             use_container_width=True
         )
-
 
 # ============================================================
 # ABA 9 - IDEB
@@ -2418,7 +3418,25 @@ with abas[8]:
                     disponibilidade,
                     x="ano",
                     y="Disponível (%)",
-                    markers=True
+                    markers=True,
+                    color_discrete_sequence=[
+                        COR_PRIMARIA
+                    ]
+                )
+
+                fig = aplicar_estilo_grafico(
+                    fig,
+                    titulo="Disponibilidade do IDEB por ano",
+                    titulo_x="Ano",
+                    titulo_y="IDEB disponível (%)",
+                    altura=480,
+                    legenda=False
+                )
+
+                fig = adicionar_rotulos_linha(
+                    fig,
+                    casas=2,
+                    percentual=True
                 )
 
                 fig.update_layout(
@@ -2432,10 +3450,8 @@ with abas[8]:
 
             with col2:
 
-                st.dataframe(
-                    disponibilidade,
-                    use_container_width=True,
-                    hide_index=True
+                exibir_tabela(
+                    disponibilidade
                 )
 
         componentes = (
@@ -2451,7 +3467,19 @@ with abas[8]:
         fig = px.histogram(
             df_original,
             x=coluna_ideb,
-            nbins=40
+            nbins=40,
+            color_discrete_sequence=[
+                COR_PRIMARIA
+            ]
+        )
+
+        fig = aplicar_estilo_grafico(
+            fig,
+            titulo="Distribuição do IDEB",
+            titulo_x="IDEB",
+            titulo_y="Frequência",
+            altura=500,
+            legenda=False
         )
 
         fig.update_layout(
@@ -2481,13 +3509,45 @@ with abas[8]:
                     min_periods=30
                 )
             )
+            matriz_ideb_exibicao = (
+                matriz_ideb.copy()
+            )
+
+            nomes_ideb = [
+                nome_amigavel(
+                    coluna
+                )
+                for coluna
+                in matriz_ideb_exibicao.columns
+            ]
+
+            matriz_ideb_exibicao.columns = (
+                nomes_ideb
+            )
+
+            matriz_ideb_exibicao.index = (
+                nomes_ideb
+            )
 
             fig = px.imshow(
-                matriz_ideb,
+                matriz_ideb_exibicao,
                 zmin=-1,
                 zmax=1,
                 text_auto=".2f",
-                aspect="auto"
+                aspect="auto",
+                color_continuous_scale=
+                    ESCALA_DIVERGENTE
+            )
+
+            fig = aplicar_estilo_grafico(
+                fig,
+                titulo=(
+                    "Correlação entre o IDEB e seus componentes"
+                ),
+                titulo_x="",
+                titulo_y="",
+                altura=620,
+                legenda=False
             )
 
             st.plotly_chart(
@@ -2654,7 +3714,30 @@ with abas[9]:
                 fig = px.bar(
                     retencao,
                     x="ano",
-                    y="Retenção (%)"
+                    y="Retenção (%)",
+                    color_discrete_sequence=[
+                        COR_PRIMARIA
+                    ]
+                )
+
+                fig = aplicar_estilo_grafico(
+                    fig,
+                    titulo=(
+                        "Registros preservados na base analítica por ano"
+                    ),
+                    titulo_x=
+                        "Ano",
+                    titulo_y=
+                        "Retenção (%)",
+                    altura=480,
+                    legenda=False
+                )
+
+                fig = adicionar_rotulos_barras(
+                    fig,
+                    orientacao="vertical",
+                    casas=2,
+                    percentual=True
                 )
 
                 fig.update_layout(
@@ -2666,10 +3749,8 @@ with abas[9]:
                     use_container_width=True
                 )
 
-                st.dataframe(
-                    retencao,
-                    use_container_width=True,
-                    hide_index=True
+                exibir_tabela(
+                    retencao
                 )
 
 
@@ -2699,7 +3780,7 @@ with abas[10]:
         for coluna in colunas_origem:
 
             st.subheader(
-                coluna
+                nome_amigavel(coluna)
             )
 
             if "ano" in df.columns:
@@ -2719,16 +3800,65 @@ with abas[10]:
                     )
                 )
 
+                # ------------------------------------------------
+                # Versão apenas para exibição
+                # Mantém os valores originais na base.
+                # ------------------------------------------------
+
+                proveniencia_exibicao = (
+                    proveniencia.copy()
+                )
+
+                proveniencia_exibicao[
+                    coluna
+                ] = (
+                    proveniencia_exibicao[
+                        coluna
+                    ]
+                    .apply(
+                        lambda valor:
+                            nome_amigavel(valor)
+                            if pd.notna(valor)
+                            else valor
+                    )
+                )
+
+                # ------------------------------------------------
+                # Gráfico
+                # ------------------------------------------------
+
                 fig = px.bar(
-                    proveniencia,
+                    proveniencia_exibicao,
                     x="ano",
                     y="Registros",
                     color=coluna,
-                    barmode="stack"
+                    barmode="stack",
+                    color_discrete_sequence=
+                        PALETA_CORES,
+                    labels={
+                        "ano":
+                            "Ano",
+
+                        "Registros":
+                            "Quantidade de registros",
+
+                        coluna:
+                            nome_amigavel(coluna)
+                    }
                 )
 
-                fig.update_layout(
-                    template="plotly_white"
+                fig = aplicar_estilo_grafico(
+                    fig,
+                    titulo="Proveniência dos registros por ano",
+                    titulo_x="Ano",
+                    titulo_y="Quantidade de registros",
+                    altura=500,
+                    legenda=True
+                )
+
+                fig.update_traces(
+                    texttemplate="%{y:,.0f}",
+                    textposition="inside"
                 )
 
                 st.plotly_chart(
@@ -2736,12 +3866,13 @@ with abas[10]:
                     use_container_width=True
                 )
 
-                st.dataframe(
-                    proveniencia,
-                    use_container_width=True,
-                    hide_index=True
-                )
+                # ------------------------------------------------
+                # Tabela
+                # ------------------------------------------------
 
+                exibir_tabela(
+                    proveniencia_exibicao
+                )
 
 # ============================================================
 # ABA 12 - PRÉ-PROCESSAMENTO
@@ -2779,37 +3910,36 @@ with abas[11]:
 
         c1.metric(
             "Prioridade alta",
-            (
-                diagnostico[
-                    "Prioridade"
-                ]
-                ==
-                "Alta"
-            ).sum()
+            formatar_inteiro(
+                (
+                    diagnostico["Prioridade"]
+                    ==
+                    "Alta"
+                ).sum()
+            )
         )
 
         c2.metric(
             "Prioridade média",
-            (
-                diagnostico[
-                    "Prioridade"
-                ]
-                ==
-                "Média"
-            ).sum()
+            formatar_inteiro(
+                (
+                    diagnostico["Prioridade"]
+                    ==
+                    "Média"
+                ).sum()
+            )
         )
 
         c3.metric(
             "Prioridade baixa",
-            (
-                diagnostico[
-                    "Prioridade"
-                ]
-                ==
-                "Baixa"
-            ).sum()
+            formatar_inteiro(
+                (
+                    diagnostico["Prioridade"]
+                    ==
+                    "Baixa"
+                ).sum()
+            )
         )
-
         contagem = (
             diagnostico[
                 "Prioridade"
@@ -2823,10 +3953,53 @@ with abas[11]:
             )
         )
 
+        ordem_prioridade = [
+            "Alta",
+            "Média",
+            "Baixa"
+        ]
+
+        cores_prioridade = {
+            "Alta":
+                COR_QUATERNARIA,
+
+            "Média":
+                COR_SECUNDARIA,
+
+            "Baixa":
+                COR_PRIMARIA
+        }
+
         fig = px.bar(
             contagem,
             x="Prioridade",
-            y="Quantidade"
+            y="Quantidade",
+            color="Prioridade",
+            category_orders={
+                "Prioridade":
+                    ordem_prioridade
+            },
+            color_discrete_map=
+                cores_prioridade
+        )
+
+        fig = aplicar_estilo_grafico(
+            fig,
+            titulo=(
+                "Variáveis segundo a prioridade diagnóstica"
+            ),
+            titulo_x=
+                "Prioridade",
+            titulo_y=
+                "Quantidade de variáveis",
+            altura=480,
+            legenda=False
+        )
+
+        fig = adicionar_rotulos_barras(
+            fig,
+            orientacao="vertical",
+            casas=0
         )
 
         fig.update_layout(
@@ -2838,10 +4011,8 @@ with abas[11]:
             use_container_width=True
         )
 
-        st.dataframe(
-            diagnostico,
-            use_container_width=True,
-            hide_index=True
+        exibir_tabela(
+            diagnostico
         )
 
 
@@ -2860,16 +4031,39 @@ with abas[12]:
         f"× {formatar_inteiro(df.shape[1])} variáveis**"
     )
 
-    st.dataframe(
-        df,
-        use_container_width=True,
-        hide_index=True,
-        height=500
+    # ============================================================
+    # VERSÃO PARA EXIBIÇÃO
+    # Mantém os nomes técnicos na base original e nos downloads.
+    # ============================================================
+
+    # ========================================================
+    # PRÉVIA FORMATADA DOS DADOS
+    # ========================================================
+
+    LIMITE_VISUALIZACAO = 500
+
+    df_previa = (
+        df.head(
+            LIMITE_VISUALIZACAO
+        )
     )
 
-    col1, col2 = st.columns(
-        2
+    exibir_tabela(
+        df_previa,
+        altura=500
     )
+
+    if len(df) > LIMITE_VISUALIZACAO:
+
+        st.caption(
+            f"São exibidos os primeiros "
+            f"{formatar_inteiro(LIMITE_VISUALIZACAO)} registros. "
+            f"Os arquivos para download contêm os "
+            f"{formatar_inteiro(len(df))} registros filtrados."
+        )
+        col1, col2 = st.columns(
+            2
+        )
 
     with col1:
 
@@ -2929,10 +4123,8 @@ with abas[12]:
         ]
     )
 
-    st.dataframe(
-        variaveis_catalogadas,
-        use_container_width=True,
-        hide_index=True
+    exibir_tabela(
+        variaveis_catalogadas
     )
 
 
